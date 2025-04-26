@@ -1,0 +1,26 @@
+name: Sync to Hugging Face Space  #this is event using this we will deploy the whole app to huggingface hub/spaces
+on:
+  push:  
+    branches: [main]   #pushing the code to [main] branch
+
+  # to run this workflow manually from the Actions tab 
+  workflow_dispatch:
+
+jobs: #running of workflow is done through this jobs
+  sync-to-hub:  #it is  event like above push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3  #getting latest version of libraries which is required for github action
+        with:
+          fetch-depth: 0
+          lfs: false
+          
+      - name: Ignore large files
+        run : git filter-branch --index-filter 'git rm -rf --cached --ignore-unmatch "Rag_Documents/layout-parser-paper.pdf"' HEAD
+
+      - name: Push to hub #event firing pushing the whole app to hub
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }} #this token need to retrievefrom huggingface ,click on your photo in hf->access token->create token using write mode->put in secret variable of github-> ADD HF_TOKEN name in secret key and add it
+        run: git push --force https://piyushmaps:$HF_TOKEN@huggingface.co/spaces/piyushmaps/agenticpiyush main
+       #when we will copy the path from hf it will be like this we need to add https://piyushmaps:$HF_TOKEN@huggingface.co/spaces/piyushmaps/agenticpiyush
+         
